@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Notebook</title>
+		<style>
+				#wrapper {
+				width: 500px;
+				margin: 0 auto;
+				position: relative;
+			}
+
+			#menu {
+				width: 150px;
+				position: absolute;
+				right: 105%;
+			}
+			#notes {
+				padding: 0;
+				margin: 0;
+			}
+			#notes li {
+				padding: 5px;
+				text-align: center;
+				margin-bottom: 10px;
+				border: 1px dashed gray;
+				list-style-type: none;
+				cursor: pointer;
+			}
+			#notes li:hover, #notes li.active {
+				background: #f1f1f1;
+			}
+			#create button {
+				width: 100%;
+				padding: 5px;
+			}
+
+			#text textarea {
+				width: 100%;
+				height: 400px;
+				box-sizing: border-box;
+				padding: 10px;
+				margin-bottom: 10px;
+			}
+			#text button {
+				width: 100%;
+				height: 30px;
+			}
+			.activ {
+				display: none;
+			}
+			.color {
+				background: greenyellow;
+			}
+			.remove {
+				position: relative;
+				right: -40%;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="wrapper">
+			<div id="menu">
+				<ul id="notes">
+				</ul>
+				<div id="create">
+					<button>новая запись</button>
+				</div>
+			</div>
+			<div id="text">
+				<textarea style="resize: none"></textarea>
+				<button data-mode='create'>сохранить</button>
+			</div>
+		</div>
+		
+		<script>
+			const save = document.querySelector('#text button');
+			const create = document.querySelector('#create button');
+			const area = document.querySelector('#text textarea');
+			const ul = document.querySelector('#notes');
+			
+			let texts = [];
+		
+		save.addEventListener('click', function func() {
+			let mode = this.dataset.mode;
+		
+			if (mode == 'create') {
+				texts.push(area.value);
+				area.value = '';
+				creationLi();
+			}
+	
+			if (mode == 'update') {
+				let key = this.dataset.key;
+				texts[key] = area.value;
+			}
+		})
+
+		create.addEventListener('click', function() {
+			creationLi();
+		})
+
+		let count = 0;
+		function creationLi() {
+			let li = document.createElement('li');
+			let span = document.createElement('span');
+			let removeSpan = document.createElement('span');
+			texts.push('')
+			li.addEventListener('click', function fun(event) {
+				if (event.currentTarget.tagName === 'LI') {
+				area.value = texts[event.currentTarget.dataset.key];
+				save.setAttribute('data-mode', 'update');
+				save.setAttribute('data-key', event.currentTarget.dataset.key);
+				addingColor();
+				}
+			})
+
+			span.textContent = `Запись ${count + 1}`;
+			span.setAttribute('class', 'open');
+			removeSpan.textContent = 'X';
+			removeSpan.setAttribute('class', 'remove');
+			li.setAttribute('data-key', count++);
+			ul.appendChild(li);
+			li.appendChild(span);
+			li.appendChild(removeSpan);
+
+			removeSpan.addEventListener('click', function() {
+				li.remove()
+				count--;
+				if (removeSpan != 'click') {
+						const creatingDiv = document.createElement('div');
+						create.insertAdjacentElement('afterend', creatingDiv);
+						creatingDiv.style.color = 'red';
+						creatingDiv.textContent = 'Запись была удалена';
+					setTimeout(() => {
+						creatingDiv.remove();
+					}, 1300);
+				}
+			})
+		}
+		  
+		function addingColor() {
+			if (event.currentTarget.tagName === 'LI') {
+				let el = document.querySelector('.color');
+				el && el.classList.remove('color');
+				event.currentTarget.classList.add('color');
+			}
+		}
+		</script>
+	</body>
+</html>
