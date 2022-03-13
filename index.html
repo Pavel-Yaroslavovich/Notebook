@@ -15,10 +15,12 @@
         position: absolute;
         right: 105%;
       }
+
       #notes {
         padding: 0;
         margin: 0;
       }
+
       #notes li {
         padding: 5px;
         text-align: center;
@@ -27,10 +29,12 @@
         list-style-type: none;
         cursor: pointer;
       }
+
       #notes li:hover,
       #notes li.active {
         background: #f1f1f1;
       }
+
       #create button {
         width: 100%;
         padding: 5px;
@@ -43,16 +47,20 @@
         padding: 10px;
         margin-bottom: 10px;
       }
+
       #text button {
         width: 100%;
         height: 30px;
       }
+
       .activ {
         display: none;
       }
+
       .color {
         background: greenyellow;
       }
+			
       .remove {
         position: relative;
         right: -40%;
@@ -73,77 +81,78 @@
       </div>
     </div>
     <script>
-      const save = document.querySelector("#text button");
-      const create = document.querySelector("#create button");
-      const area = document.querySelector("#text textarea");
+      const saveButton = document.querySelector("#text button");
+      const createButton = document.querySelector("#create button");
+      const textarea = document.querySelector("#text textarea");
       const ul = document.querySelector("#notes");
+      const texts = [];
+      const addingColor = (event) => {
+        if (event.currentTarget.tagName === "LI") {
+          const coloredLi = document.querySelector(".color");
+          coloredLi && coloredLi.classList.remove("color");
+          event.currentTarget.classList.add("color");
+        }
+      }
+      const creatRemoveBtn = (li, count) => {
+        const removeSpan = document.createElement("span");
 
-      let texts = [];
+        removeSpan.textContent = "X";
+        removeSpan.classList.add("remove");
+        removeSpan.addEventListener("click", function () {
+          li.remove();
+          count--;
+          const creatingDiv = document.createElement("div");
+          createButton.insertAdjacentElement("afterend", creatingDiv);
+          creatingDiv.style.color = "red";
+          creatingDiv.textContent = "Запись была удалена";
+          setTimeout(() => {
+            creatingDiv.remove();
+          }, 1300);
+        });
+        return removeSpan;
+      }
 
-      save.addEventListener("click", function func() {
-        let mode = this.dataset.mode;
+      saveButton.addEventListener("click", function() {
+        const {mode} = this.dataset;
 
-        if (mode == "create") {
-          texts.push(area.value);
-          area.value = "";
-          creationLi();
+        if (mode === "create") {
+          texts.push(textarea.value);
+          textarea.value = "";
+          const newLi = creationLi();
+          ul.appendChild(newLi);
         }
 
-        if (mode == "update") {
-          let key = this.dataset.key;
-          texts[key] = area.value;
+        if (mode === "update") {
+          texts[this.dataset.key] = textarea.value;
         }
       });
 
-      create.addEventListener("click", function () {
-        creationLi();
+      createButton.addEventListener("click", () => {
+        texts.push("");
+        const newLi = creationLi();
+        ul.appendChild(newLi);
       });
 
       let count = 0;
       function creationLi() {
-        let li = document.createElement("li");
-        let span = document.createElement("span");
-        let removeSpan = document.createElement("span");
-        texts.push("");
-        li.addEventListener("click", function fun(event) {
+        const li = document.createElement("li");
+        const span = document.createElement("span");
+        const removeSpan = creatRemoveBtn(li, count)
+        
+        li.addEventListener("click", (event) => {
           if (event.currentTarget.tagName === "LI") {
-            area.value = texts[event.currentTarget.dataset.key];
-            save.setAttribute("data-mode", "update");
-            save.setAttribute("data-key", event.currentTarget.dataset.key);
-            addingColor();
+            textarea.value = texts[event.currentTarget.dataset.key];
+            saveButton.setAttribute("data-mode", "update");
+            saveButton.setAttribute("data-key", event.currentTarget.dataset.key);
+            addingColor(event);
           }
         });
-
+      
         span.textContent = `Запись ${count + 1}`;
-        span.setAttribute("class", "open");
-        removeSpan.textContent = "X";
-        removeSpan.setAttribute("class", "remove");
-        li.setAttribute("data-key", count++);
-        ul.appendChild(li);
+        li.dataset.key = count++;
         li.appendChild(span);
         li.appendChild(removeSpan);
-
-        removeSpan.addEventListener("click", function () {
-          li.remove();
-          count--;
-          if (removeSpan != "click") {
-            const creatingDiv = document.createElement("div");
-            create.insertAdjacentElement("afterend", creatingDiv);
-            creatingDiv.style.color = "red";
-            creatingDiv.textContent = "Запись была удалена";
-            setTimeout(() => {
-              creatingDiv.remove();
-            }, 1300);
-          }
-        });
-      }
-
-      function addingColor() {
-        if (event.currentTarget.tagName === "LI") {
-          let el = document.querySelector(".color");
-          el && el.classList.remove("color");
-          event.currentTarget.classList.add("color");
-        }
+        return li;
       }
     </script>
   </body>
